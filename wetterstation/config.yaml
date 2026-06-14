@@ -33,4 +33,3 @@ ports_description:
 map:
   - data:rw
 
-image: "ghcr.io/{YOUR_GITHUB_USERNAME}/ha-addon-wetterstation/{arch}"
