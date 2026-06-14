@@ -1,8 +1,7 @@
-ARG BUILD_FROM
-FROM $BUILD_FROM
+FROM ghcr.io/home-assistant/amd64-base:latest
 
-# Install Node.js + build tools for better-sqlite3
-RUN apk add --no-cache nodejs npm python3 make g++
+# Install Node.js 20 LTS (HA base ships newer node which breaks better-sqlite3)
+RUN apk add --no-cache nodejs-lts npm python3 make g++
 
 WORKDIR /app
 
