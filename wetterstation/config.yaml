@@ -1,6 +1,6 @@
 name: "Wetterstation Guldistückli"
 description: "MQTT weather station dashboard for Guldistückli F9"
-version: "1.4.3"
+version: "1.4.4"
 slug: "wetterstation"
 init: false
 host_network: true
