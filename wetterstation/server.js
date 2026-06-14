@@ -66,6 +66,19 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify(config.stations));
   }
 
+  // ── REST: /debug ──────────────────────────────────────────────────────
+  if (url.pathname === '/debug') {
+    const info = {
+      version: '1.4.3',
+      mqttConnected: mqttClient.connected,
+      sseClients: sseClients.size,
+      stateKeys: Object.fromEntries(Object.entries(state).map(([id, keys]) => [id, Object.keys(keys)])),
+      state,
+    };
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify(info, null, 2));
+  }
+
   // ── REST: /state ──────────────────────────────────────────────────────
   if (url.pathname === '/state') {
     res.writeHead(200, {
