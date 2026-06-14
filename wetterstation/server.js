@@ -26,6 +26,12 @@ for (const station of config.stations) {
   state[station.id] = {};
 }
 
+// Seed with last known values from DB so UI is never blank after restart
+for (const [sensorKey, data] of Object.entries(db.latest())) {
+  const [stationId, key] = sensorKey.split('/');
+  if (state[stationId]) state[stationId][key] = { value: data.value, ts: data.ts, available: true };
+}
+
 // ── HTTP + static file server ─────────────────────────────────────────────────
 
 const MIME = {
@@ -62,7 +68,10 @@ const server = http.createServer((req, res) => {
 
   // ── REST: /state ──────────────────────────────────────────────────────
   if (url.pathname === '/state') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.writeHead(200, {
+      'Content-Type':  'application/json',
+      'Cache-Control': 'no-store',
+    });
     return res.end(JSON.stringify(state));
   }
 

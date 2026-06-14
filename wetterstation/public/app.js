@@ -211,7 +211,7 @@ const dot = document.getElementById('status-dot');
 
 async function poll() {
   try {
-    const s = await fetch('/state').then(r => r.json());
+    const s = await fetch('/state?_=' + Date.now()).then(r => r.json());
     dot.className = 'online';
     applySnapshot(s);
   } catch {
