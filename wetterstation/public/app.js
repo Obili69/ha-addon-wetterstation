@@ -210,7 +210,8 @@ document.getElementById('modal-backdrop').addEventListener('click', e => {
 const dot = document.getElementById('status-dot');
 
 function connect() {
-  const ws = new WebSocket(`ws://${location.host}`);
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const ws = new WebSocket(`${proto}//${location.host}`);
 
   ws.addEventListener('open', () => {
     dot.className = 'online';
