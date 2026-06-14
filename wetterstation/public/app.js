@@ -211,7 +211,7 @@ const dot = document.getElementById('status-dot');
 
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const ws = new WebSocket(`${proto}//${location.host}`);
+  const ws = new WebSocket(`${proto}//${location.host}${location.pathname}`);
 
   ws.addEventListener('open', () => {
     dot.className = 'online';
