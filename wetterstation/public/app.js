@@ -58,8 +58,10 @@ function buildGrid() {
       card.className = 'card' + (s.type === 'text' || s.type === 'direction' ? '' : '');
       card.id = `card-${station.id}-${s.key}`;
       card.innerHTML = `
-        <div class="badge-offline">Offline</div>
-        <div class="card-label">${s.label}</div>
+        <div class="card-header">
+          <div class="card-label">${s.label}</div>
+          <div class="badge-offline">Offline</div>
+        </div>
         <div class="card-val">–</div>
         <div class="card-ts" id="ts-${station.id}-${s.key}">–</div>
       `;

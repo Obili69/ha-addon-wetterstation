@@ -48,19 +48,19 @@
     .card.no-chart { cursor: default; }
     .card.no-chart:hover { transform: none; border-color: var(--border); }
 
-    .card-label { font-size: .75rem; color: var(--muted); margin-bottom: .5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+    .card-label { font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-value { font-size: 2rem; font-weight: 700; line-height: 1; }
     .card-value span.unit { font-size: 1rem; font-weight: 400; color: var(--muted); margin-left: .2em; }
     .card-ts { font-size: .7rem; color: var(--muted); margin-top: .5rem; }
 
     .badge-offline {
-      position: absolute; top: .6rem; right: .6rem;
       background: var(--red); color: #fff;
-      font-size: .65rem; padding: .15rem .4rem;
+      font-size: .6rem; padding: .15rem .4rem;
       border-radius: 4px; font-weight: 600;
-      display: none;
+      display: none; flex-shrink: 0; margin-left: .4rem;
     }
-    .card.offline .badge-offline { display: block; }
+    .card.offline .badge-offline { display: inline-block; }
     .card.offline .card-value { opacity: .4; }
 
     /* compass */
