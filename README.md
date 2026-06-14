@@ -6,7 +6,7 @@ MQTT weather dashboard for Guldistückli F9.
 
 1. Go to **Settings → Add-ons → Add-on Store**
 2. Click the **⋮ menu** (top right) → **Repositories**
-3. Add: `https://github.com/Obili69/ha-addon-wetterstation.git`
+3. Add: `https://github.com/YOUR_GITHUB_USERNAME/ha-addon-wetterstation`
 4. Find **Wetterstation Guldistückli** in the store and install
 5. Configure MQTT credentials in the add-on **Configuration** tab
 6. Start the add-on

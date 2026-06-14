@@ -1,14 +1,25 @@
-#!/usr/bin/with-contenv bashio
+#!/bin/sh
+set -e
 
-# Read config from HA options
-export MQTT_HOST=$(bashio::config 'mqtt_host')
-export MQTT_PORT=$(bashio::config 'mqtt_port')
-export MQTT_USER=$(bashio::config 'mqtt_user')
-export MQTT_PASSWORD=$(bashio::config 'mqtt_password')
-export PORT=$(bashio::config 'web_port')
+OPTIONS_FILE="/data/options.json"
 
-bashio::log.info "Starting Wetterstation on port ${PORT}"
-bashio::log.info "Connecting to MQTT: ${MQTT_HOST}:${MQTT_PORT}"
+# HA supervisor writes options to /data/options.json
+if [ -f "$OPTIONS_FILE" ]; then
+  export MQTT_HOST=$(jq -r '.mqtt_host' "$OPTIONS_FILE")
+  export MQTT_PORT=$(jq -r '.mqtt_port' "$OPTIONS_FILE")
+  export MQTT_USER=$(jq -r '.mqtt_user' "$OPTIONS_FILE")
+  export MQTT_PASSWORD=$(jq -r '.mqtt_password' "$OPTIONS_FILE")
+  export PORT=$(jq -r '.web_port' "$OPTIONS_FILE")
+else
+  echo "No options.json found, using defaults"
+  export MQTT_HOST="${MQTT_HOST:-localhost}"
+  export MQTT_PORT="${MQTT_PORT:-1883}"
+  export MQTT_USER="${MQTT_USER:-homeassistant}"
+  export MQTT_PASSWORD="${MQTT_PASSWORD:-}"
+  export PORT="${PORT:-3001}"
+fi
 
-cd /app
-exec node server.js
+echo "Starting Wetterstation on port ${PORT}"
+echo "Connecting to MQTT: ${MQTT_HOST}:${MQTT_PORT}"
+
+exec node /app/server.js

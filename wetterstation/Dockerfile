@@ -1,7 +1,6 @@
-FROM ghcr.io/home-assistant/amd64-base:latest
+FROM node:20-alpine
 
-# Install Node.js 20 LTS (HA base ships newer node which breaks better-sqlite3)
-RUN apk add --no-cache nodejs-lts npm python3 make g++
+RUN apk add --no-cache python3 make g++ jq
 
 WORKDIR /app
 
