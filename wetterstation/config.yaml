@@ -1,0 +1,36 @@
+name: "Wetterstation Guldistückli"
+description: "MQTT weather station dashboard for Guldistückli F9"
+version: "1.0.0"
+slug: "wetterstation"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+
+# Configurable options shown in HA UI
+options:
+  mqtt_host: "localhost"
+  mqtt_port: 1883
+  mqtt_user: "homeassistant"
+  mqtt_password: ""
+  web_port: 3001
+
+schema:
+  mqtt_host: str
+  mqtt_port: int
+  mqtt_user: str
+  mqtt_password: str
+  web_port: int
+
+ports:
+  3001/tcp: 3001
+
+ports_description:
+  3001/tcp: "Wetterstation Web UI"
+
+map:
+  - data:rw
+
+image: "ghcr.io/{YOUR_GITHUB_USERNAME}/ha-addon-wetterstation/{arch}"

@@ -1,0 +1,14 @@
+{
+  "name": "wetterstation",
+  "version": "1.0.0",
+  "description": "Wetterstation Guldistückli — MQTT → WS → Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "mqtt": "^5.5.0",
+    "ws": "^8.17.0"
+  }
+}
