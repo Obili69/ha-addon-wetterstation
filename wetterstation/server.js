@@ -3,7 +3,6 @@ const http       = require('http');
 const fs         = require('fs');
 const path       = require('path');
 const mqtt       = require('mqtt');
-const { WebSocketServer } = require('ws');
 const config     = require('./config');
 const db         = require('./db');
 
@@ -37,6 +36,9 @@ const MIME = {
   '.ico':  'image/x-icon',
 };
 
+// SSE clients
+const sseClients = new Set();
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://localhost`);
 
@@ -52,10 +54,25 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify(rows));
   }
 
-  // ── REST: /config (sends station/sensor meta to frontend) ──────────────
+  // ── REST: /config ──────────────────────────────────────────────────────
   if (url.pathname === '/config') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify(config.stations));
+  }
+
+  // ── SSE: /events ──────────────────────────────────────────────────────
+  if (url.pathname === '/events') {
+    res.writeHead(200, {
+      'Content-Type':      'text/event-stream',
+      'Cache-Control':     'no-cache',
+      'Connection':        'keep-alive',
+      'X-Accel-Buffering': 'no',   // disable Nginx response buffering
+    });
+    // Send full state immediately on connect
+    res.write(`data: ${JSON.stringify({ type: 'snapshot', state })}\n\n`);
+    sseClients.add(res);
+    req.on('close', () => sseClients.delete(res));
+    return;
   }
 
   // ── Static files ────────────────────────────────────────────────────────
@@ -70,21 +87,14 @@ const server = http.createServer((req, res) => {
   });
 });
 
-// ── WebSocket server ──────────────────────────────────────────────────────────
-
-const wss = new WebSocketServer({ server });
+// ── SSE broadcast ─────────────────────────────────────────────────────────────
 
 function broadcast(msg) {
-  const payload = JSON.stringify(msg);
-  for (const client of wss.clients) {
-    if (client.readyState === 1 /* OPEN */) client.send(payload);
+  const payload = `data: ${JSON.stringify(msg)}\n\n`;
+  for (const client of sseClients) {
+    client.write(payload);
   }
 }
-
-wss.on('connection', (ws) => {
-  // Send full current state to newly connected client
-  ws.send(JSON.stringify({ type: 'snapshot', state }));
-});
 
 // ── MQTT ──────────────────────────────────────────────────────────────────────
 
@@ -97,7 +107,6 @@ const mqttClient = mqtt.connect({
 
 mqttClient.on('connect', () => {
   console.log('[MQTT] Connected to', config.mqtt.host);
-  // Subscribe all station topics
   for (const station of config.stations) {
     mqttClient.subscribe(`weather/${station.id}/#`);
   }
@@ -111,7 +120,6 @@ mqttClient.on('message', (topic, payload) => {
   // ── availability topics ──────────────────────────────────────────────────
   if (availableTopics[topic]) {
     const key       = availableTopics[topic];
-    // find station id
     const parts     = topic.split('/');
     const stationId = parts[1];
     if (state[stationId] && state[stationId][key] !== undefined) {
@@ -133,7 +141,6 @@ mqttClient.on('message', (topic, payload) => {
   const prev = state[stationId][key] || {};
   state[stationId][key] = { value, ts, available: prev.available !== false };
 
-  // Persist numeric values
   if (type !== 'text') db.insert(`${stationId}/${key}`, value);
 
   broadcast({ type: 'update', stationId, key, value, ts });
@@ -142,5 +149,5 @@ mqttClient.on('message', (topic, payload) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 server.listen(config.wsPort, () => {
-  console.log(`[HTTP/WS] Listening on port ${config.wsPort}`);
+  console.log(`[HTTP/SSE] Listening on port ${config.wsPort}`);
 });

@@ -206,25 +206,21 @@ document.getElementById('modal-backdrop').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-backdrop')) closeModal();
 });
 
-// ── WebSocket ─────────────────────────────────────────────────────────────────
+// ── SSE ───────────────────────────────────────────────────────────────────────
 const dot = document.getElementById('status-dot');
 
 function connect() {
-  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const ws = new WebSocket(`${proto}//${location.host}${location.pathname}`);
+  const es = new EventSource('/events');
 
-  ws.addEventListener('open', () => {
+  es.addEventListener('open', () => {
     dot.className = 'online';
   });
 
-  ws.addEventListener('close', () => {
+  es.addEventListener('error', () => {
     dot.className = 'offline';
-    setTimeout(connect, 3000);
   });
 
-  ws.addEventListener('error', () => ws.close());
-
-  ws.addEventListener('message', ({ data }) => {
+  es.addEventListener('message', ({ data }) => {
     const msg = JSON.parse(data);
 
     if (msg.type === 'snapshot') {
