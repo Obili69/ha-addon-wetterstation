@@ -60,6 +60,12 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify(config.stations));
   }
 
+  // ── REST: /state ──────────────────────────────────────────────────────
+  if (url.pathname === '/state') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify(state));
+  }
+
   // ── SSE: /events ──────────────────────────────────────────────────────
   if (url.pathname === '/events') {
     res.writeHead(200, {
@@ -87,7 +93,7 @@ const server = http.createServer((req, res) => {
   });
 });
 
-// ── SSE broadcast ─────────────────────────────────────────────────────────────
+// ── SSE broadcast + keepalive ─────────────────────────────────────────────────
 
 function broadcast(msg) {
   const payload = `data: ${JSON.stringify(msg)}\n\n`;
@@ -95,6 +101,13 @@ function broadcast(msg) {
     client.write(payload);
   }
 }
+
+// Prevent proxy timeouts on idle SSE connections
+setInterval(() => {
+  for (const client of sseClients) {
+    client.write(': keepalive\n\n');
+  }
+}, 25000);
 
 // ── MQTT ──────────────────────────────────────────────────────────────────────
 

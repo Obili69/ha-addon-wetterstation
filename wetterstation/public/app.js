@@ -206,23 +206,24 @@ document.getElementById('modal-backdrop').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-backdrop')) closeModal();
 });
 
-// ── SSE ───────────────────────────────────────────────────────────────────────
+// ── Live updates: polling (always works) + SSE (real-time when proxy allows) ──
 const dot = document.getElementById('status-dot');
 
-function connect() {
-  const es = new EventSource('/events');
-
-  es.addEventListener('open', () => {
+async function poll() {
+  try {
+    const s = await fetch('/state').then(r => r.json());
     dot.className = 'online';
-  });
-
-  es.addEventListener('error', () => {
+    applySnapshot(s);
+  } catch {
     dot.className = 'offline';
-  });
+  }
+}
+
+function connectSSE() {
+  const es = new EventSource('/events');
 
   es.addEventListener('message', ({ data }) => {
     const msg = JSON.parse(data);
-
     if (msg.type === 'snapshot') {
       applySnapshot(msg.state);
     } else if (msg.type === 'update') {
@@ -237,6 +238,18 @@ function connect() {
       updateCard(msg.stationId, msg.key, prev.value, prev.ts, msg.available);
     }
   });
+
+  es.addEventListener('error', () => {
+    if (es.readyState === EventSource.CLOSED) {
+      setTimeout(connectSSE, 10000);
+    }
+  });
+}
+
+function connect() {
+  poll();
+  setInterval(poll, 5000);
+  connectSSE();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
