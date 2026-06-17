@@ -69,7 +69,7 @@ const server = http.createServer((req, res) => {
   // ── REST: /debug ──────────────────────────────────────────────────────
   if (url.pathname === '/debug') {
     const info = {
-      version: '1.4.3',
+      version: '1.5.0',
       mqttConnected: mqttClient.connected,
       sseClients: sseClients.size,
       stateKeys: Object.fromEntries(Object.entries(state).map(([id, keys]) => [id, Object.keys(keys)])),
